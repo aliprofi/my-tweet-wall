@@ -1,0 +1,314 @@
+/* AliProfi Tweet Wall Styles */
+#tweet-wall {
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+#tweet-wall * {
+    box-sizing: border-box;
+}
+
+/* Форма твита */
+#tweet-form {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+#tweet-form textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+}
+
+#tweet-form textarea:focus {
+    outline: none;
+    border-color: #1da1f2;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+}
+
+#tweet-form button {
+    background: linear-gradient(135deg, #1da1f2, #0d8bd9);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#tweet-form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(29, 161, 242, 0.4);
+}
+
+#add-hashtag {
+    background: linear-gradient(135deg, #17bf63, #0e9f4f) !important;
+    padding: 10px 18px !important;
+    font-size: 14px !important;
+}
+
+.char-counter {
+    font-size: 14px;
+    color: #657786;
+}
+
+.char-counter.warning {
+    color: #e1306c;
+}
+
+/* Твиты */
+.tweet {
+    background: white;
+    border: 1px solid #e1e8ed;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.tweet:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.tweet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.tweet-header strong {
+    color: #14171a;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.tweet-date {
+    color: #657786;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.tweet-date:hover {
+    color: #1da1f2;
+}
+
+.tweet-content {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #14171a;
+    margin-bottom: 15px;
+    word-wrap: break-word;
+}
+
+.tweet-content p {
+    margin: 0 0 10px 0;
+}
+
+.tweet-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Хештеги */
+.tweet-hashtag {
+    color: #1da1f2;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.tweet-hashtag:hover {
+    color: #0d8bd9;
+    text-decoration: underline;
+}
+
+/* Действия с твитом */
+.tweet-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 10px;
+    border-top: 1px solid #f1f3f4;
+}
+
+.like-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    color: #657786;
+}
+
+.like-button:hover {
+    background: rgba(224, 36, 94, 0.1);
+    color: #e1306c;
+}
+
+.like-button.liked {
+    color: #e1306c;
+}
+
+.like-button .like-icon {
+    font-size: 18px;
+    margin-right: 6px;
+}
+
+.like-button .like-count {
+    font-weight: 600;
+}
+
+/* Пагинация */
+.pagination {
+    margin: 30px 0;
+    text-align: center;
+}
+
+.page-numbers {
+    display: inline-block;
+    padding: 10px 16px;
+    margin: 0 5px;
+    border: 2px solid #e1e8ed;
+    border-radius: 25px;
+    color: #1da1f2;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.page-numbers:hover {
+    background: #1da1f2;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.page-numbers.current {
+    background: #1da1f2;
+    color: white;
+    border-color: #1da1f2;
+}
+
+/* Популярные теги */
+#tweet-tags {
+    margin-top: 40px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    text-align: center;
+}
+
+#tweet-tags h3 {
+    margin: 0 0 20px 0;
+    color: #14171a;
+    font-size: 18px;
+}
+
+.tweet-tag-button {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 5px;
+    background: white;
+    border: 2px solid #e1e8ed;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #1da1f2;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.tweet-tag-button:hover {
+    background: #1da1f2;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(29, 161, 242, 0.3);
+}
+
+/* Сообщения */
+.no-tweets {
+    text-align: center;
+    padding: 60px 20px;
+    color: #657786;
+    font-size: 18px;
+    background: #f8f9fa;
+    border-radius: 15px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    #tweet-wall {
+        margin: 0 15px;
+    }
+    
+    .tweet {
+        padding: 15px;
+    }
+    
+    .form-buttons {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
+    #tweet-form button,
+    #add-hashtag {
+        width: 100%;
+    }
+    
+    .char-counter {
+        text-align: center;
+    }
+}
+
+/* Анимации загрузки */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Скрытие элементов при печати */
+@media print {
+    #tweet-form,
+    .tweet-actions,
+    .pagination,
+    #tweet-tags {
+        display: none !important;
+    }
+}
