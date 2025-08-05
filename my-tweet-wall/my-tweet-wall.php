@@ -1,10 +1,9 @@
 <?php
 /**
  * Plugin Name: AliProfi Tweet Wall
- * Plugin URI:  https://aliprofi.ru
- * Description: Микроблог с хештегами, лайками и защитой контента.
- * Version:     2.0.1
- * Author:      Ali Profi
+ * Description: Микроблог с хештегами, лайками, облаком тегов и защитой копирования.
+ * Version:     2.0.2
+ * Author:      AliProfi
  * Text Domain: aliprofi-tweet-wall
  */
 
@@ -15,6 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class AliProfi_Tweet_Wall {
 
     public function __construct() {
+
         add_action( 'init',               [ $this, 'register_post_type_taxonomy' ] );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 
@@ -38,15 +38,13 @@ final class AliProfi_Tweet_Wall {
     public function register_post_type_taxonomy() {
 
         register_post_type( 'mytweet', [
-            'label'               => 'Твиты',
-            'public'              => true,
-            'menu_icon'           => 'dashicons-twitter',
-            'show_in_rest'        => true,
-            'supports'            => [ 'title', 'editor', 'author' ],
-            'rewrite'             => [ 'slug' => 'mytweet' ],
-            'has_archive'         => true,
-            'publicly_queryable'  => true,
-            'exclude_from_search' => false,
+            'label'       => 'Твиты',
+            'public'      => true,
+            'menu_icon'   => 'dashicons-twitter',
+            'show_in_rest'=> true,
+            'supports'    => [ 'title', 'editor', 'author' ],
+            'rewrite'     => [ 'slug' => 'mytweet' ],
+            'has_archive' => true,
         ] );
 
         register_taxonomy( 'tweet_tag', 'mytweet', [
@@ -67,7 +65,7 @@ final class AliProfi_Tweet_Wall {
             'aliprofi-tweet-wall',
             plugin_dir_url( __FILE__ ) . 'style.css',
             [],
-            '2.0.1'
+            '2.0.2'
         );
 
         wp_enqueue_script( 'jquery' );
@@ -76,7 +74,7 @@ final class AliProfi_Tweet_Wall {
             'aliprofi-tweet-wall',
             plugin_dir_url( __FILE__ ) . 'script.js',
             [ 'jquery' ],
-            '2.0.1',
+            '2.0.2',
             true
         );
 
@@ -89,7 +87,7 @@ final class AliProfi_Tweet_Wall {
             'aliprofi-antivor',
             plugin_dir_url( __FILE__ ) . 'antivor.js',
             [],
-            '2.0.1',
+            '2.0.2',
             true
         );
     }
@@ -124,19 +122,48 @@ final class AliProfi_Tweet_Wall {
 
             <div id="tweets"></div>
             <div id="pagination"></div>
+
+            <?php $this->display_popular_tags(); ?>
         </div>
         <?php
         return ob_get_clean();
     }
 
     /* --------------------------------------------------------------------- */
-    /*  AJAX — загрузка твитов                                                */
+    /*  Облако популярных тегов                                               */
+    /* --------------------------------------------------------------------- */
+
+    private function display_popular_tags() {
+
+        $tags = get_terms( [
+            'taxonomy'   => 'tweet_tag',
+            'hide_empty' => true,
+            'number'     => 30,
+            'orderby'    => 'count',
+            'order'      => 'DESC',
+        ] );
+
+        if ( ! $tags ) {
+            return;
+        }
+
+        echo '<div id="tweet-tags"><h3>Популярные теги:</h3>';
+        foreach ( $tags as $tag ) {
+            $link = get_term_link( $tag );
+            echo '<a href="' . esc_url( $link ) . '" class="tweet-tag-button">#' .
+                 esc_html( $tag->name ) . ' (' . $tag->count . ')</a>';
+        }
+        echo '</div>';
+    }
+
+    /* --------------------------------------------------------------------- */
+    /*  AJAX – загрузка твитов и т. д.                                        */
     /* --------------------------------------------------------------------- */
 
     public function ajax_load_tweets() {
 
-        $page  = max( 1, intval( $_POST['page'] ?? 1 ) );
-        $per   = 10;
+        $page = max( 1, intval( $_POST['page'] ?? 1 ) );
+        $per  = 10;
 
         $q = new WP_Query( [
             'post_type'      => 'mytweet',
@@ -160,10 +187,6 @@ final class AliProfi_Tweet_Wall {
         ] );
     }
 
-    /* --------------------------------------------------------------------- */
-    /*  AJAX — публикация твита                                               */
-    /* --------------------------------------------------------------------- */
-
     public function ajax_add_tweet() {
 
         check_ajax_referer( 'aliprofi_tweet_nonce', 'nonce' );
@@ -183,7 +206,6 @@ final class AliProfi_Tweet_Wall {
         $id = wp_insert_post( [
             'post_type'    => 'mytweet',
             'post_status'  => 'publish',
-            'post_excerpt' => '',
             'post_title'   => mb_substr( $content, 0, 50, 'UTF-8' ),
             'post_content' => $content,
             'post_author'  => get_current_user_id(),
@@ -191,10 +213,6 @@ final class AliProfi_Tweet_Wall {
 
         $id ? wp_send_json_success() : wp_send_json_error( 'Не удалось сохранить' );
     }
-
-    /* --------------------------------------------------------------------- */
-    /*  AJAX — лайки                                                          */
-    /* --------------------------------------------------------------------- */
 
     public function ajax_toggle_like() {
 
@@ -211,7 +229,6 @@ final class AliProfi_Tweet_Wall {
         $liked = in_array( $user_id, $likes, true );
 
         $liked ? $likes = array_diff( $likes, [ $user_id ] ) : $likes[] = $user_id;
-
         update_post_meta( $post_id, '_tweet_likes', $likes );
 
         wp_send_json_success( [
@@ -229,15 +246,12 @@ final class AliProfi_Tweet_Wall {
         $content = get_post_field( 'post_content', $id );
         $content = $this->format_tweet_content( $content );
 
-        $author  = get_userdata( get_post_field( 'post_author', $id ) );
-        $likes   = (array) get_post_meta( $id, '_tweet_likes', true );
-        $liked   = is_user_logged_in() && in_array( get_current_user_id(), $likes, true );
+        $likes = (array) get_post_meta( $id, '_tweet_likes', true );
+        $liked = is_user_logged_in() && in_array( get_current_user_id(), $likes, true );
 
-        ob_start();
-        ?>
+        ob_start(); ?>
         <div class="tweet" data-id="<?php echo $id; ?>">
             <div class="tweet-content"><?php echo $content; ?></div>
-
             <div class="tweet-actions">
                 <button
                     class="like-button<?php echo $liked ? ' liked' : ''; ?>"
@@ -259,76 +273,65 @@ final class AliProfi_Tweet_Wall {
 
     private function format_tweet_content( $text ) {
 
-        // 1. Делаем ссылки кликабельными
         $text = preg_replace(
             '~(https?://[^\s<]+)~iu',
             '<a href="$1" target="_blank" rel="noopener">$1</a>',
             esc_html( $text )
         );
 
-        // 2. Обрабатываем хештеги (только в текстовых узлах)
         $text = $this->link_hashtags( $text );
 
-        // 3. Параграфы
         return wpautop( $text );
     }
 
-    /**
-     * Оборачивает #тег ссылкой, не затрагивая уже существующие HTML-теги.
-     */
     private function link_hashtags( $text ) {
 
         $chunks = wp_html_split( $text );
 
         foreach ( $chunks as &$c ) {
             if ( $c === '' || $c[0] === '<' ) {
-                continue; // пропускаем HTML
+                continue;
             }
-
             $c = preg_replace_callback(
-                '/(?<![\p{L}0-9_])#([\p{L}][\p{L}0-9_]+)/u',
+                '/#([\p{L}][\p{L}0-9_]+)/u',
                 function ( $m ) {
-                    $tag  = $m[1];
-                    $term = get_term_by( 'name', $tag, 'tweet_tag' );
 
+                    $term = get_term_by( 'name', $m[1], 'tweet_tag' );
                     if ( $term && ! is_wp_error( $term ) ) {
                         $url = get_term_link( $term );
-                        return '<a href="' . esc_url( $url ) . '" class="tweet-hashtag">#' . esc_html( $tag ) . '</a>';
+                        return '<a href="' . esc_url( $url ) . '" class="tweet-hashtag">#' .
+                               esc_html( $m[1] ) . '</a>';
                     }
                     return $m[0];
                 },
                 $c
             );
         }
-
         return implode( '', $chunks );
     }
 
     /* --------------------------------------------------------------------- */
-    /*  Сохранение тегов при публикации                                       */
+    /*  Сохранение тегов                                                      */
     /* --------------------------------------------------------------------- */
 
     public function save_tweet_tags( $post_id ) {
 
         $content = get_post_field( 'post_content', $post_id );
-        preg_match_all( '/#([\p{L}][\p{L}0-9_]+)/u', $content, $matches );
+        preg_match_all( '/#([\p{L}][\p{L}0-9_]+)/u', $content, $m );
 
-        if ( empty( $matches[1] ) ) {
+        if ( empty( $m[1] ) ) {
             return;
         }
 
         $terms = [];
-        foreach ( $matches[1] as $tag ) {
+        foreach ( $m[1] as $tag ) {
 
-            $tag = trim( $tag );
             $slug = $this->transliterate( $tag );
-
             $term = get_term_by( 'slug', $slug, 'tweet_tag' );
+
             if ( ! $term ) {
-                $res = wp_insert_term( $tag, 'tweet_tag', [ 'slug' => $slug ] );
-                if ( ! is_wp_error( $res ) ) {
-                    $term = get_term( $res['term_id'] );
-                }
+                $res  = wp_insert_term( $tag, 'tweet_tag', [ 'slug' => $slug ] );
+                $term = ! is_wp_error( $res ) ? get_term( $res['term_id'] ) : null;
             }
 
             if ( $term && ! is_wp_error( $term ) ) {
@@ -342,28 +345,22 @@ final class AliProfi_Tweet_Wall {
     }
 
     /* --------------------------------------------------------------------- */
-    /*  Транслитерация                                                        */
+    /*  Хэлперы                                                               */
     /* --------------------------------------------------------------------- */
 
-    private function transliterate( $str ) {
+    private function transliterate( $s ) {
 
         static $map = [
-            'а'=>'a','б'=>'b','в'=>'v','г'=>'g','д'=>'d','е'=>'e','ё'=>'yo','ж'=>'zh',
-            'з'=>'z','и'=>'i','й'=>'y','к'=>'k','л'=>'l','м'=>'m','н'=>'n','о'=>'o',
-            'п'=>'p','р'=>'r','с'=>'s','т'=>'t','у'=>'u','ф'=>'f','х'=>'h','ц'=>'ts',
-            'ч'=>'ch','ш'=>'sh','щ'=>'shch','ы'=>'y','э'=>'e','ю'=>'yu','я'=>'ya',
-            'ь'=>'','ъ'=>''
+            'а'=>'a','б'=>'b','в'=>'v','г'=>'g','д'=>'d','е'=>'e','ё'=>'yo','ж'=>'zh','з'=>'z','и'=>'i',
+            'й'=>'y','к'=>'k','л'=>'l','м'=>'m','н'=>'n','о'=>'o','п'=>'p','р'=>'r','с'=>'s','т'=>'t',
+            'у'=>'u','ф'=>'f','х'=>'h','ц'=>'ts','ч'=>'ch','ш'=>'sh','щ'=>'shch','ы'=>'y','э'=>'e',
+            'ю'=>'yu','я'=>'ya','ь'=>'','ъ'=>''
         ];
-
-        $str = mb_strtolower( $str, 'UTF-8' );
-        $str = strtr( $str, $map );
-        $str = preg_replace( '/[^a-z0-9]+/u', '-', $str );
-        return trim( $str, '-' );
+        $s = mb_strtolower( $s, 'UTF-8' );
+        $s = strtr( $s, $map );
+        $s = preg_replace( '/[^a-z0-9]+/u', '-', $s );
+        return trim( $s, '-' );
     }
-
-    /* --------------------------------------------------------------------- */
-    /*  Pagination                                                            */
-    /* --------------------------------------------------------------------- */
 
     private function pagination( $max, $current ) {
 
@@ -375,12 +372,10 @@ final class AliProfi_Tweet_Wall {
         if ( $current > 1 ) {
             $out .= '<a href="#" class="page-numbers prev">«</a>';
         }
-
         for ( $i = 1; $i <= $max; $i++ ) {
-            $cls = $i === $current ? ' class="page-numbers current"' : ' class="page-numbers"';
-            $out .= '<a href="#"' . $cls . '>' . $i . '</a>';
+            $cls = $i === $current ? 'page-numbers current' : 'page-numbers';
+            $out .= '<a href="#" class="' . $cls . '">' . $i . '</a>';
         }
-
         if ( $current < $max ) {
             $out .= '<a href="#" class="page-numbers next">»</a>';
         }
@@ -388,13 +383,14 @@ final class AliProfi_Tweet_Wall {
     }
 
     /* --------------------------------------------------------------------- */
-    /*  Шаблоны из папки /templates/                                          */
+    /*  Шаблоны                                                               */
     /* --------------------------------------------------------------------- */
 
     public function template_override() {
 
         if ( is_singular( 'mytweet' ) ) {
-            $tpl = plugin_dir_path( __FILE__ ) . 'templates/single-mytweet.php';
+            $tpl = plugin_dir_path( __FILE__ ) .
+                   'templates/single-mytweet.php';
             if ( file_exists( $tpl ) ) {
                 include $tpl;
                 exit;
@@ -402,7 +398,8 @@ final class AliProfi_Tweet_Wall {
         }
 
         if ( is_tax( 'tweet_tag' ) ) {
-            $tpl = plugin_dir_path( __FILE__ ) . 'templates/taxonomy-tweet_tag.php';
+            $tpl = plugin_dir_path( __FILE__ ) .
+                   'templates/taxonomy-tweet_tag.php';
             if ( file_exists( $tpl ) ) {
                 include $tpl;
                 exit;
@@ -411,5 +408,5 @@ final class AliProfi_Tweet_Wall {
     }
 }
 
-/*  Запуск плагина  */
+/* Запуск плагина */
 new AliProfi_Tweet_Wall();

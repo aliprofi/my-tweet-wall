@@ -220,7 +220,6 @@
 #tweet-tags {
     margin-top: 40px;
     padding: 20px;
-    background: #f8f9fa;
     border-radius: 15px;
     text-align: center;
 }
@@ -312,3 +311,106 @@
         display: none !important;
     }
 }
+
+.uSocial-Share {
+  margin-top: 25px;
+}
+.uSocial-Share .share-btn {
+  display: inline-block;
+  margin: 0 6px 6px 0;
+  padding: 6px 12px;
+  background: #f1f3f5;
+  border-radius: 6px;
+  font-weight: 700;
+  color: #3d1204;
+  text-decoration: none;
+  font-size: 14px;
+}
+.uSocial-Share .share-btn:hover {
+  background: #e9ecef;
+}
+
+/* Кнопка «Поделиться» под твитами в архиве тегов */
+.tweet-share-btn{
+    display:inline-block;
+    margin:4px 0;
+    border-radius:12px;
+    padding:3px 7px;
+    border:1px solid #ddd;
+    background:#ddd;
+    font:500 16px/20px system-ui, sans-serif;
+    color:#000;
+    white-space:nowrap;
+    text-shadow:0 1px 1px rgba(0,0,0,.2);
+    box-shadow:0 4px 6px rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.2);
+    opacity:.8;
+    cursor:pointer;
+    transition:all .2s ease;
+}
+.tweet-share-btn:hover{
+    background:#cfcfcf;
+    opacity:1;
+}
+.tweet-item{
+    margin-bottom:25px;
+}
+.tweet-text{
+    font-size:1.4em;
+    line-height:1.4;
+    margin:0 0 6px 0;
+}
+
+/* Твит и компактная кнопка в одну строку */
+.tweet-item{
+    margin-bottom:20px;
+    font:400 18px/1.4 'Kurale',serif;
+}
+.tweet-text{
+    white-space:pre-wrap; /* переносы строк из nl2br */
+}
+.tweet-share-btn{
+    display:inline-block;
+    margin-left:8px;
+    border-radius:12px;
+    padding:3px 7px;
+    border:1px solid #ddd;
+    background:#ddd;
+    font:500 16px/20px system-ui,sans-serif;
+    color:#000;
+    white-space:nowrap;
+    text-shadow:0 1px 1px rgba(0,0,0,.2);
+    box-shadow:0 4px 6px rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.2);
+    opacity:.8;
+    cursor:pointer;
+    transition:.2s ease;
+}
+.tweet-share-btn:hover{
+    background:#cfcfcf;
+    opacity:1;
+}
+
+/* === Архивы тегов: твит в серой рамке с округлением === */
+.tweet-item{
+    border:1px solid #bbb;      /* серая рамка */
+    border-radius:15px;         /* скруглённые углы */
+    padding:15px;               /* внутренний отступ */
+    margin-bottom:20px;         /* расстояние между твитами */
+    background:#fff;            /* белый фон внутри рамки */
+}
+
+/* === Облако тегов — убираем фон контейнера === */
+#tweet-tags{
+    background:none !important; /* убираем любой заданный фон */
+    padding:0;                  /* если нужен «нулевой» отступ */
+}
+
+/* Постоянный голубой цвет для хеш-тегов (#tag) */
+.tweet-hashtag{
+    color:#0d6efd !important;   /* ваш фирменный голубой */
+    text-decoration:underline;  /* по желанию */
+    transition:none;            /* убираем смену цвета при :hover */
+}
+.tweet-hashtag:hover{
+    color:#0d6efd !important;   /* остаётся тем же */
+}
+
